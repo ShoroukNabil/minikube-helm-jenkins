@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mvn-stack.clientName" . }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "mvn-stack.clientName" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "mvn-stack.clientName" . }}
+    spec:
+      containers:
+        - name: mvn-client
+          image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
+          imagePullPolicy: {{ .Values.client.image.pullPolicy }}
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: {{ include "mvn-stack.fullname" . }}-client-nginx

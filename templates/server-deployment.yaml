@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mvn-stack.backendFullname" . }}-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ include "mvn-stack.backendFullname" . }}-server
+  template:
+    metadata:
+      labels:
+        app: {{ include "mvn-stack.backendFullname" . }}-server
+    spec:
+      containers:
+        - name: mvn-server
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: {{ .Values.server.env.SPRING_DATASOURCE_URL }}
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mvn-stack.mysqlFullname" . }}
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "mvn-stack.mysqlFullname" . }}
+                  key: password
+          ports:
+            - containerPort: {{ .Values.server.service.port }}

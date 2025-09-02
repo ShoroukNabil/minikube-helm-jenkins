@@ -1,0 +1,46 @@
+global:
+  imagePullPolicy: IfNotPresent
+  labels: {}
+namespaceOverride: ""
+server:
+  image:
+    repository: shorouknabil/mvn-server
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    # name can be overridden, otherwise it will default to <release>-server
+    port: 9090
+  env:
+    SPRING_DATASOURCE_URL: jdbc:mysql://{{ include "mvn-stack.fullname" . }}-mysql:3306/devops
+    SPRING_DATASOURCE_USERNAME: root
+    SPRING_DATASOURCE_PASSWORD: rootpass
+
+client:
+  image:
+    repository: shorouknabil/mvn-client
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 80
+
+mysql:
+  enabled: true
+  image:
+    repository: mysql
+    tag: "8.0"
+    pullPolicy: IfNotPresent
+  rootPassword: root123
+  database: devops
+  user: appuser
+  password: app123
+  persistence:
+    enabled: true
+    size: 5Gi
+    storageClass: ""  # leave empty for default
+  resources:
+    requests:
+      memory: 512Mi
+      cpu: 250m
+    limits:
+      memory: 1Gi
+      cpu: 500m
