@@ -1,27 +1,10 @@
+# default values for mvn-stack
+
 global:
   imagePullPolicy: IfNotPresent
-  labels: {}
-namespaceOverride: ""
-server:
-  image:
-    repository: shorouknabil/mvn-server
-    tag: latest
-    pullPolicy: IfNotPresent
-  service:
-    # name can be overridden, otherwise it will default to <release>-server
-    port: 9090
-  env:
-    SPRING_DATASOURCE_URL: jdbc:mysql://{{ include "mvn-stack.fullname" . }}-mysql:3306/devops
-    SPRING_DATASOURCE_USERNAME: root
-    SPRING_DATASOURCE_PASSWORD: rootpass
 
-client:
-  image:
-    repository: shorouknabil/mvn-client
-    tag: latest
-    pullPolicy: IfNotPresent
-  service:
-    port: 80
+fullnameOverride: ""
+nameOverride: ""
 
 mysql:
   enabled: true
@@ -29,18 +12,48 @@ mysql:
     repository: mysql
     tag: "8.0"
     pullPolicy: IfNotPresent
-  rootPassword: root123
-  database: devops
+  rootPassword: rootpass
   user: appuser
-  password: app123
+  password: apppass
+  database: devops
+  service:
+    port: 3306
   persistence:
     enabled: true
-    size: 5Gi
-    storageClass: ""  # leave empty for default
+    size: 1Gi
+    storageClass: "" # default storage class if empty
   resources:
     requests:
-      memory: 512Mi
-      cpu: 250m
+      cpu: 100m
+      memory: 256Mi
     limits:
-      memory: 1Gi
       cpu: 500m
+      memory: 1Gi
+
+server:
+  image:
+    repository: shorouknabil/mvn-server
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    port: 9090
+  env: {}
+  resources: {}
+
+client:
+  image:
+    repository: shorouknabil/mvn-client
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 1
+  service:
+    port: 80
+  resources: {}
+
+ingress:
+  enabled: true
+  host: mvn.localtest.me
+  className: ""
+  tls: []
+  annotations: {}

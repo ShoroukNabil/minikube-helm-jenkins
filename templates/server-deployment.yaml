@@ -1,33 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mvn-stack.backendFullname" . }}-server
+  name: {{ include "mvn-stack.backendFullname" . }}
+  labels:
+    {{- include "mvn-stack.labels" . | nindent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.server.replicaCount }}
   selector:
     matchLabels:
-      app: {{ include "mvn-stack.backendFullname" . }}-server
+      app.kubernetes.io/name: {{ include "mvn-stack.name" . }}
+      app.kubernetes.io/component: backend
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ include "mvn-stack.backendFullname" . }}-server
+        app.kubernetes.io/name: {{ include "mvn-stack.name" . }}
+        app.kubernetes.io/component: backend
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-        - name: mvn-server
+        - name: backend
           image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
-          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.server.image.pullPolicy | default .Values.global.imagePullPolicy | default "IfNotPresent" }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.server.service.port }}
           env:
             - name: SPRING_DATASOURCE_URL
-              value: {{ .Values.server.env.SPRING_DATASOURCE_URL }}
+              value: jdbc:mysql://{{ include "mvn-stack.mysqlFullname" . }}:3306/{{ .Values.mysql.database }}
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "mvn-stack.mysqlFullname" . }}
+                  name: {{ include "mvn-stack.mysqlSecretName" . }}
                   key: username
             - name: SPRING_DATASOURCE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "mvn-stack.mysqlFullname" . }}
+                  name: {{ include "mvn-stack.mysqlSecretName" . }}
                   key: password
-          ports:
-            - containerPort: {{ .Values.server.service.port }}
+          resources:
+            {{- toYaml .Values.server.resources | nindent 12 }}

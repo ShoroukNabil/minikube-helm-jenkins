@@ -1,10 +1,18 @@
+{{- if .Values.mysql.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "mvn-stack.mysqlFullname" . }}-mysql
+  name: {{ include "mvn-stack.mysqlFullname" . }}
+  labels:
+    {{- include "mvn-stack.labels" . | nindent 4 }}
 spec:
-  ports:
-    - port: {{ .Values.mysql.service.port }}
-      targetPort: {{ .Values.mysql.service.port }}
+  clusterIP: None
   selector:
-    app: {{ include "mvn-stack.mysqlFullname" . }}-mysql
+    app.kubernetes.io/name: {{ include "mvn-stack.name" . }}
+    app.kubernetes.io/component: mysql
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  ports:
+    - name: mysql
+      port: {{ .Values.mysql.service.port }}
+      targetPort: 3306
+{{- end }}

@@ -23,7 +23,7 @@ spec:
       containers:
         - name: mysql
           image: "{{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}"
-          imagePullPolicy: {{ .Values.mysql.image.pullPolicy | default .Values.global.imagePullPolicy }}
+          imagePullPolicy: {{ .Values.mysql.image.pullPolicy | default .Values.global.imagePullPolicy | default "IfNotPresent" }}
           env:
             - name: MYSQL_ROOT_PASSWORD
               value: "{{ .Values.mysql.rootPassword }}"
@@ -43,15 +43,22 @@ spec:
             {{- toYaml .Values.mysql.resources | nindent 12 }}
           livenessProbe:
             exec:
-              command: ["mysqladmin", "ping", "-h", "localhost", "-uroot", "-p{{ .Values.mysql.rootPassword }}"]
+              command:
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -uroot -p"${MYSQL_ROOT_PASSWORD}"
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             exec:
-              command: ["mysqladmin", "ping", "-h", "localhost", "-uroot", "-p{{ .Values.mysql.rootPassword }}"]
+              command:
+                - /bin/sh
+                - -c
+                - mysqladmin ping -h 127.0.0.1 -uroot -p"${MYSQL_ROOT_PASSWORD}"
             initialDelaySeconds: 10
             periodSeconds: 5
   volumeClaimTemplates:
+    {{- if .Values.mysql.persistence.enabled }}
     - metadata:
         name: data
         labels:
@@ -64,4 +71,15 @@ spec:
         resources:
           requests:
             storage: {{ .Values.mysql.persistence.size }}
+    {{- else }}
+    - metadata:
+        name: data
+        labels:
+          {{- include "mvn-stack.labels" . | nindent 10 }}
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: {{ .Values.mysql.persistence.size }}
+    {{- end }}
 {{- end }}

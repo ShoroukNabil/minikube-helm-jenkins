@@ -3,7 +3,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "mvn-stack.fullname" . }}-ingress
+  labels:
+    {{- include "mvn-stack.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{ toYaml . | nindent 4 }}
+  {{- end }}
 spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:
@@ -12,7 +21,11 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "mvn-stack.fullname" . }}-client
+                name: {{ include "mvn-stack.frontendFullname" . }}
                 port:
-                  number: {{ .Values.client.servicePort }}
+                  number: {{ .Values.client.service.port }}
+{{- if .Values.ingress.tls }}
+  tls:
+    {{ toYaml .Values.ingress.tls | nindent 4 }}
+{{- end }}
 {{- end }}
