@@ -3,15 +3,15 @@ pipeline {
 
     environment {
         HELM_RELEASE   = "my-app"
-        HELM_NAMESPACE = "dev"
-        HELM_CHART     = "./helm/my-app"
+        HELM_NAMESPACE = "devops"
+        //HELM_CHART     = "."
     }
 
     stages {
         stage('Checkout') {
             steps {
                 echo "Checking out source code..."
-                git branch: 'main', url: 'https://github.com/your/repo.git'
+                git branch: 'main', url: 'https://github.com/ShoroukNabil/minikube-helm-jenkins.git'
             }
         }
 
@@ -23,7 +23,7 @@ pipeline {
 
                     sh """
                     kubectl config use-context minikube
-                    helm upgrade --install ${HELM_RELEASE} ${HELM_CHART} \
+                    helm upgrade --install ${HELM_RELEASE} . \
                         --namespace ${HELM_NAMESPACE} --create-namespace \
                         --set image.tag=${GIT_COMMIT_ID}
                     """
