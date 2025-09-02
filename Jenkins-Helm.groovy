@@ -1,64 +1,49 @@
 pipeline {
-    agent {
-        // ✅ Use a container with helm + kubectl installed
-        docker {
-            image 'alpine/helm:3.14.0'   // official Helm image (comes with kubectl)
-            args '-u root:root'         // run as root to avoid permissions issues
-        }
-    }
+    agent any
 
     environment {
-        // ✅ Set your release name & namespace
-        HELM_RELEASE = "myapp"
-        HELM_NAMESPACE = "default"
+        HELM_RELEASE   = "my-app"
+        HELM_NAMESPACE = "dev"
+        HELM_CHART     = "./helm/my-app"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                checkout scm
+                echo "Checking out source code..."
+                git branch: 'main', url: 'https://github.com/your/repo.git'
             }
         }
 
-        stage('Helm Lint') {
+        stage('Helm Deploy') {
             steps {
-                sh 'helm lint ./'
-            }
-        }
+                script {
+                    def GIT_COMMIT_ID = sh(returnStdout: true, script: 'git rev-parse --short HEAD').trim()
+                    echo "Deploying ${HELM_RELEASE}:${GIT_COMMIT_ID} to namespace ${HELM_NAMESPACE}"
 
-        stage('Helm Upgrade/Install') {
-            steps {
-                sh '''
-                echo "Deploying release: ${HELM_RELEASE}"
-                helm upgrade --install ${HELM_RELEASE} ./ \
-                  --namespace ${HELM_NAMESPACE} \
-                  --create-namespace
-                '''
+                    sh """
+                    kubectl config use-context minikube
+                    helm upgrade --install ${HELM_RELEASE} ${HELM_CHART} \
+                        --namespace ${HELM_NAMESPACE} --create-namespace \
+                        --set image.tag=${GIT_COMMIT_ID}
+                    """
+                }
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh '''
-                echo "Waiting for pods to be ready..."
-                kubectl rollout status statefulset/${HELM_RELEASE}-mysql -n ${HELM_NAMESPACE} || true
-                kubectl rollout status deployment/${HELM_RELEASE}-backend -n ${HELM_NAMESPACE} || true
-                kubectl rollout status deployment/${HELM_RELEASE}-frontend -n ${HELM_NAMESPACE} || true
-
-                echo "Current resources:"
-                kubectl get pods -n ${HELM_NAMESPACE}
-                '''
+                sh "kubectl get pods -n ${HELM_NAMESPACE}"
             }
         }
     }
 
     post {
         success {
-            echo '✅ Helm deployment completed successfully!'
+            echo "Deployment succeeded! Check your app with 'minikube service list'."
         }
         failure {
-            echo '❌ Helm deployment failed. Check logs above.'
+            echo "Deployment failed. Check Jenkins logs for details."
         }
     }
 }
