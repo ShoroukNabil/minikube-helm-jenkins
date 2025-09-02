@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "mvn-stack.frontendFullname" . }}
+  metadata:
+  namespace: {{ .Values.global.namespace }}
   labels:
     {{- include "mvn-stack.labels" . | nindent 4 }}
 spec:

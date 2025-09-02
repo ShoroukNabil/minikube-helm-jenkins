@@ -2,6 +2,7 @@
 
 global:
   imagePullPolicy: IfNotPresent
+  namespace: devops
 
 fullnameOverride: ""
 nameOverride: ""
@@ -12,9 +13,9 @@ mysql:
     repository: mysql
     tag: "8.0"
     pullPolicy: IfNotPresent
-  rootPassword: rootpass
+  rootPassword: DevOps_P@ssw0rd
   user: appuser
-  password: apppass
+  password: DevOps_P@ssw0rd
   database: devops
   service:
     port: 3306
@@ -32,8 +33,8 @@ mysql:
 
 server:
   image:
-    repository: shorouknabil/mvn-server
-    tag: latest
+    repository: shoroukimage/backend
+    tag: 1.0.1
     pullPolicy: IfNotPresent
   replicaCount: 1
   service:
@@ -43,8 +44,8 @@ server:
 
 client:
   image:
-    repository: shorouknabil/mvn-client
-    tag: latest
+    repository: shoroukimage/frontend
+    tag: 1.0.0
     pullPolicy: IfNotPresent
   replicaCount: 1
   service:

@@ -3,6 +3,8 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "mvn-stack.mysqlFullname" . }}
+  metadata:
+  namespace: {{ .Values.global.namespace }}
   labels:
     {{- include "mvn-stack.labels" . | nindent 4 }}
 spec:

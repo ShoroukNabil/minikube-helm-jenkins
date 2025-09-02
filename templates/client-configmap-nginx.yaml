@@ -4,6 +4,9 @@ metadata:
   name: {{ include "mvn-stack.frontendFullname" . }}-nginx
   labels:
     {{- include "mvn-stack.labels" . | nindent 4 }}
+    metadata:
+  namespace: {{ .Values.global.namespace }}
+
 data:
   nginx.conf: |
     server {

@@ -1,5 +1,5 @@
 apiVersion: v2
-name: mvn-stack
+name: myapp
 description: Helm chart to deploy Spring Boot + Angular + MySQL stack
 type: application
 version: 0.1.0

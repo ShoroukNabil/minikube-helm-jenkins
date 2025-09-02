@@ -1,0 +1,15 @@
+Thanks for installing mvn-stack!
+
+To build images locally inside minikube:
+  eval $(minikube -p minikube docker-env)
+  docker build -t shorouknabil/mvn-server:latest ./DevOps_MVN_Server
+  docker build -t shorouknabil/mvn-client:latest ./DevOps_MVN_Client
+
+Install the chart:
+  helm install mvn-stack ./mvn-stack
+
+Enable ingress in minikube if you plan to use it:
+  minikube addons enable ingress
+
+Access app (example host):
+  http://mvn.localtest.me/
