@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        HELM_RELEASE   = "my-app"
+        HELM_RELEASE   = "myapp"
         HELM_NAMESPACE = "devops"
         //HELM_CHART     = "."
     }
