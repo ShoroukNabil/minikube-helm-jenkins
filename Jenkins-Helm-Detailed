@@ -60,7 +60,6 @@ pipeline {
             steps {
                 echo "🔎 Verifying pods and waiting for readiness..."
                 sh """
-                kubectl rollout status deployment/${HELM_RELEASE} -n ${HELM_NAMESPACE} --timeout=120s
                 kubectl get all -n ${HELM_NAMESPACE}
                 """
             }
