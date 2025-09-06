@@ -12,9 +12,6 @@ pipeline {
                 script {
                     echo "🔍 Checking cluster connectivity..."
                     sh """
-                    echo ">> Checking Minikube status"
-                    minikube status || (echo "❌ Minikube is not running!" && exit 1)
-
                     echo ">> Checking kubectl cluster-info"
                     kubectl cluster-info || (echo "❌ Cannot reach cluster!" && exit 1)
 
