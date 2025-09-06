@@ -11,7 +11,7 @@ pipeline {
             steps {
                 script {
                     echo "🔍 Checking cluster connectivity..."
-                    sh '''
+                    sh """
                     echo ">> Checking Minikube status"
                     minikube status || (echo "❌ Minikube is not running!" && exit 1)
 
@@ -20,7 +20,7 @@ pipeline {
 
                     echo ">> Ensuring namespace exists"
                     kubectl get ns ${HELM_NAMESPACE} || kubectl create ns ${HELM_NAMESPACE}
-                    '''
+                    """
                 }
             }
         }
