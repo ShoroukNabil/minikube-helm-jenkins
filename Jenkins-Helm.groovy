@@ -22,7 +22,6 @@ pipeline {
                     echo "Deploying ${HELM_RELEASE}:${GIT_COMMIT_ID} to namespace ${HELM_NAMESPACE}"
 
                     sh """
-                    kubectl config use-context minikube
                     helm upgrade --install ${HELM_RELEASE} . \
                         --namespace ${HELM_NAMESPACE} --create-namespace \
                         --set image.tag=${GIT_COMMIT_ID}
